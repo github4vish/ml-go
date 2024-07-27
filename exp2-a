@@ -1,0 +1,46 @@
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"log"
+	"os"
+)
+
+type Employee struct {
+	Name      string `json:"name"`
+	Age       int    `json:"age"`
+	Email     string `json:"email"`
+	IsManager bool   `json:"is_manager"`
+}
+
+type Employees struct {
+	Employees []Employee `json:"employees"`
+}
+
+func main() {
+	// Read the JSON file
+	file, err := os.Open("data.json")
+	if err != nil {
+		log.Fatalf("failed to open file: %s", err)
+	}
+	defer file.Close()
+
+	// Read the file content
+	byteValue, _ := ioutil.ReadAll(file)
+
+	// Unmarshal JSON data into struct
+	var employees Employees
+	err = json.Unmarshal(byteValue, &employees)
+	if err != nil {
+		log.Fatalf("failed to unmarshal JSON: %s", err)
+	}
+
+	// Print the parsed data
+	fmt.Println("Parsed Employee Data:")
+	for _, employee := range employees.Employees {
+		fmt.Printf("Name: %s, Age: %d, Email: %s, Is Manager: %t\n",
+			employee.Name, employee.Age, employee.Email, employee.IsManager)
+	}
+}

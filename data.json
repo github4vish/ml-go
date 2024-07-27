@@ -1,0 +1,28 @@
+{
+    "employees": [
+        {
+            "name": "John Doe",
+            "age": 30,
+            "email": "john.doe@example.com",
+            "is_manager": false
+        },
+        {
+            "name": "Jane Smith",
+            "age": 25,
+            "email": "jane.smith@example.com",
+            "is_manager": true
+        },
+        {
+            "name": "Emily Johnson",
+            "age": 28,
+            "email": "emily.johnson@example.com",
+            "is_manager": false
+        },
+        {
+            "name": "Michael Brown",
+            "age": 35,
+            "email": "michael.brown@example.com",
+            "is_manager": true
+        }
+    ]
+}

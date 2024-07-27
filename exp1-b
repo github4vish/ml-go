@@ -1,0 +1,91 @@
+package main
+
+import (
+	"encoding/csv"
+	"fmt"
+	"log"
+	"os"
+	"strconv"
+)
+
+type Iris struct {
+	SepalLength float64
+	SepalWidth  float64
+	PetalLength float64
+	PetalWidth  float64
+	Species     string
+}
+
+func main() {
+	// Open the CSV file
+	file, err := os.Open("iris.csv")
+	if err != nil {
+		log.Fatalf("failed to open file: %s", err)
+	}
+	defer file.Close()
+
+	// Create a CSV reader
+	reader := csv.NewReader(file)
+
+	// Read all records
+	records, err := reader.ReadAll()
+	if err != nil {
+		log.Fatalf("failed to read CSV: %s", err)
+	}
+
+	var irisData []Iris
+
+	// Process each record
+	for i, record := range records {
+		if i == 0 { // Skip header
+			continue
+		}
+
+		// Handle unexpected fields and types
+		if len(record) != 5 {
+			log.Printf("unexpected number of fields in record %d: %v", i, record)
+			continue
+		}
+
+		sepalLength, err := strconv.ParseFloat(record[0], 64)
+		if err != nil {
+			log.Printf("invalid sepal_length in record %d: %v", i, record[0])
+			continue
+		}
+
+		sepalWidth, err := strconv.ParseFloat(record[1], 64)
+		if err != nil {
+			log.Printf("invalid sepal_width in record %d: %v", i, record[1])
+			continue
+		}
+
+		petalLength, err := strconv.ParseFloat(record[2], 64)
+		if err != nil {
+			log.Printf("invalid petal_length in record %d: %v", i, record[2])
+			continue
+		}
+
+		petalWidth, err := strconv.ParseFloat(record[3], 64)
+		if err != nil {
+			log.Printf("invalid petal_width in record %d: %v", i, record[3])
+			continue
+		}
+
+		species := record[4]
+
+		irisData = append(irisData, Iris{
+			SepalLength: sepalLength,
+			SepalWidth:  sepalWidth,
+			PetalLength: petalLength,
+			PetalWidth:  petalWidth,
+			Species:     species,
+		})
+	}
+
+	// Output the parsed data
+	fmt.Println("Parsed Iris Data:")
+	for _, iris := range irisData {
+		fmt.Printf("Sepal Length: %.1f, Sepal Width: %.1f, Petal Length: %.1f, Petal Width: %.1f, Species: %s\n",
+			iris.SepalLength, iris.SepalWidth, iris.PetalLength, iris.PetalWidth, iris.Species)
+	}
+}
