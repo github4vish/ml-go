@@ -1,0 +1,58 @@
+package main
+
+import (
+	"fmt"
+)
+
+func accuracy(yTrue, yPred []bool) float64 {
+	correct := 0
+	for i := range yTrue {
+		if yTrue[i] == yPred[i] {
+			correct++
+		}
+	}
+	return float64(correct) / float64(len(yTrue))
+}
+
+func precision(yTrue, yPred []bool) float64 {
+	truePositives := 0
+	falsePositives := 0
+	for i := range yTrue {
+		if yPred[i] {
+			if yTrue[i] {
+				truePositives++
+			} else {
+				falsePositives++
+			}
+		}
+	}
+	return float64(truePositives) / float64(truePositives+falsePositives)
+}
+
+func recall(yTrue, yPred []bool) float64 {
+	truePositives := 0
+	falseNegatives := 0
+	for i := range yTrue {
+		if yTrue[i] {
+			if yPred[i] {
+				truePositives++
+			} else {
+				falseNegatives++
+			}
+		}
+	}
+	return float64(truePositives) / float64(truePositives+falseNegatives)
+}
+
+func main() {
+	yTrue := []bool{true, false, true, true, false}
+	yPred := []bool{true, false, true, false, false}
+
+	acc := accuracy(yTrue, yPred)
+	prec := precision(yTrue, yPred)
+	rec := recall(yTrue, yPred)
+
+	fmt.Printf("Accuracy: %.2f\n", acc)
+	fmt.Printf("Precision: %.2f\n", prec)
+	fmt.Printf("Recall: %.2f\n", rec)
+}

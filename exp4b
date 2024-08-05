@@ -1,0 +1,39 @@
+package main
+
+import (
+	"fmt"
+	"log"
+	"os"
+	"sort"
+
+	"github.com/go-gota/gota/dataframe"
+	"gonum.org/v1/gonum/stat"
+)
+
+func main() {
+	// Open the CSV file.
+	irisFile, err := os.Open("iris.csv")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer irisFile.Close()
+
+	// Create a dataframe from the CSV file.
+	irisDF := dataframe.ReadCSV(irisFile)
+
+	// Get the float values from the "sepal_length" column
+	data := irisDF.Col("sepal_length").Float()
+
+	// Sort the data before calculating the quantile
+	sort.Float64s(data)
+
+	// Calculate mean, median, and standard deviation
+	mean := stat.Mean(data, nil)
+	median := stat.Quantile(0.5, stat.Empirical, data, nil)
+	stdDev := stat.StdDev(data, nil)
+
+	// Output the results
+	fmt.Printf("Mean: %.2f\n", mean)
+	fmt.Printf("Median: %.2f\n", median)
+	fmt.Printf("Standard Deviation: %.2f\n", stdDev)
+}

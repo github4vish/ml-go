@@ -1,0 +1,48 @@
+package main
+
+import (
+	"fmt"
+	"math"
+
+	"gonum.org/v1/gonum/stat"
+)
+
+func meanSquaredError(yTrue, yPred []float64) float64 {
+	var mse float64
+	for i := range yTrue {
+		mse += math.Pow(yTrue[i]-yPred[i], 2)
+	}
+	return mse / float64(len(yTrue))
+}
+
+func meanAbsoluteError(yTrue, yPred []float64) float64 {
+	var mae float64
+	for i := range yTrue {
+		mae += math.Abs(yTrue[i] - yPred[i])
+	}
+	return mae / float64(len(yTrue))
+}
+
+func rSquared(yTrue, yPred []float64) float64 {
+	mean := stat.Mean(yTrue, nil)
+	ssTotal := 0.0
+	ssRes := 0.0
+	for i := range yTrue {
+		ssTotal += math.Pow(yTrue[i]-mean, 2)
+		ssRes += math.Pow(yTrue[i]-yPred[i], 2)
+	}
+	return 1 - (ssRes / ssTotal)
+}
+
+func main() {
+	yTrue := []float64{1, 2, 3, 4, 5}
+	yPred := []float64{1.1, 1.9, 3.2, 3.9, 5.1}
+
+	mse := meanSquaredError(yTrue, yPred)
+	mae := meanAbsoluteError(yTrue, yPred)
+	r2 := rSquared(yTrue, yPred)
+
+	fmt.Printf("MSE: %.2f\n", mse)
+	fmt.Printf("MAE: %.2f\n", mae)
+	fmt.Printf("R²: %.2f\n", r2)
+}
