@@ -20,6 +20,7 @@ require (
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
 	github.com/mattn/go-sqlite3 v1.14.22 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/sajari/regression v1.0.1 // indirect
 	golang.org/x/exp v0.0.0-20231110203233-9a3e6036ecaa // indirect
 	golang.org/x/exp/shiny v0.0.0-20230801115018-d63ba01acd4b // indirect
 	golang.org/x/image v0.14.0 // indirect

@@ -12,17 +12,17 @@ import (
 
 func main() {
 	// Open the CSV file.
-	irisFile, err := os.Open("iris.csv")
+	AdFile, err := os.Open("Advertising.csv")
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer irisFile.Close()
+	defer AdFile.Close()
 
 	// Create a dataframe from the CSV file.
-	irisDF := dataframe.ReadCSV(irisFile)
+	irisDF := dataframe.ReadCSV(AdFile)
 
 	// Get the float values from the "sepal_length" column
-	data := irisDF.Col("sepal_length").Float()
+	data := irisDF.Col("Sales").Float()
 
 	// Sort the data before calculating the quantile
 	sort.Float64s(data)

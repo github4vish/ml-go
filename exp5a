@@ -1,48 +1,74 @@
 package main
 
 import (
+	"encoding/csv"
 	"fmt"
+	"io"
+	"log"
 	"math"
+	"os"
+	"strconv"
 
 	"gonum.org/v1/gonum/stat"
 )
 
-func meanSquaredError(yTrue, yPred []float64) float64 {
-	var mse float64
-	for i := range yTrue {
-		mse += math.Pow(yTrue[i]-yPred[i], 2)
-	}
-	return mse / float64(len(yTrue))
-}
-
-func meanAbsoluteError(yTrue, yPred []float64) float64 {
-	var mae float64
-	for i := range yTrue {
-		mae += math.Abs(yTrue[i] - yPred[i])
-	}
-	return mae / float64(len(yTrue))
-}
-
-func rSquared(yTrue, yPred []float64) float64 {
-	mean := stat.Mean(yTrue, nil)
-	ssTotal := 0.0
-	ssRes := 0.0
-	for i := range yTrue {
-		ssTotal += math.Pow(yTrue[i]-mean, 2)
-		ssRes += math.Pow(yTrue[i]-yPred[i], 2)
-	}
-	return 1 - (ssRes / ssTotal)
-}
-
 func main() {
-	yTrue := []float64{1, 2, 3, 4, 5}
-	yPred := []float64{1.1, 1.9, 3.2, 3.9, 5.1}
+	// Open the continuous observations and predictions.
+	f, err := os.Open("continuous_data.csv")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer f.Close()
+	// Create a new CSV reader reading from the opened file.
+	reader := csv.NewReader(f)
+	// observed and predicted will hold the parsed observed and predicted values
+	// form the continuous data file.
+	var observed []float64
+	var predicted []float64
+	// line will track row numbers for logging.
+	line := 1
+	// Read in the records looking for unexpected types in the columns.
+	for {
+		// Read in a row. Check if we are at the end of the file.
+		record, err := reader.Read()
+		if err == io.EOF {
+			break
+		}
+		// Skip the header.
+		if line == 1 {
+			line++
+			continue
+		}
+		// Read in the observed and predicted values.
+		observedVal, err := strconv.ParseFloat(record[0], 64)
+		if err != nil {
+			log.Printf("Parsing line %d failed, unexpected type\n", line)
+			continue
+		}
+		predictedVal, err := strconv.ParseFloat(record[1], 64)
+		if err != nil {
+			log.Printf("Parsing line %d failed, unexpected type\n", line)
+			continue
+		}
+		// Append the record to our slice, if it has the expected type.
+		observed = append(observed, observedVal)
+		predicted = append(predicted, predictedVal)
+		line++
 
-	mse := meanSquaredError(yTrue, yPred)
-	mae := meanAbsoluteError(yTrue, yPred)
-	r2 := rSquared(yTrue, yPred)
+	}
 
-	fmt.Printf("MSE: %.2f\n", mse)
-	fmt.Printf("MAE: %.2f\n", mae)
+	// Calculate the mean absolute error and mean squared error.
+	var mAE float64
+	var mSE float64
+	for idx, oVal := range observed {
+		mAE += math.Abs(oVal-predicted[idx]) / float64(len(observed))
+		mSE += math.Pow(oVal-predicted[idx], 2) / float64(len(observed))
+	}
+
+	// Calculate the R^2 value.
+	r2 := stat.RSquaredFrom(observed, predicted, nil)
+
+	fmt.Printf("MSE: %.2f\n", mSE)
+	fmt.Printf("MAE: %.2f\n", mAE)
 	fmt.Printf("R²: %.2f\n", r2)
 }
