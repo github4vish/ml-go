@@ -1,0 +1,91 @@
+package main
+
+import (
+	"fmt"
+	"math"
+	"math/rand"
+	"time"
+
+	"gonum.org/v1/gonum/mat"
+)
+
+func main() {
+	rand.Seed(time.Now().UnixNano())
+
+	// Define the input data
+	input := mat.NewDense(3, 4, []float64{
+		1.0, 0.0, 1.0, 0.0,
+		1.0, 0.0, 1.0, 1.0,
+		0.0, 1.0, 0.0, 1.0,
+	})
+
+	// Network parameters
+	inputNeurons := 4
+	hiddenNeurons := 3
+	outputNeurons := 1
+
+	// Initialize weights and biases
+	wHidden := mat.NewDense(inputNeurons, hiddenNeurons, randomFloats(inputNeurons*hiddenNeurons))
+	bHidden := mat.NewDense(1, hiddenNeurons, randomFloats(hiddenNeurons))
+	wOut := mat.NewDense(hiddenNeurons, outputNeurons, randomFloats(hiddenNeurons*outputNeurons))
+	bOut := mat.NewDense(1, outputNeurons, randomFloats(outputNeurons))
+
+	// Forward pass
+	hiddenLayerInput := mat.NewDense(3, hiddenNeurons, nil)
+	hiddenLayerInput.Mul(input, wHidden)
+
+	// Add bias to each row of the hidden layer input
+	hiddenLayerInput.Add(hiddenLayerInput, expandBias(bHidden, 3))
+
+	hiddenLayerActivations := applySigmoid(hiddenLayerInput)
+
+	outputLayerInput := mat.NewDense(3, outputNeurons, nil)
+	outputLayerInput.Mul(hiddenLayerActivations, wOut)
+
+	// Add bias to each row of the output layer input
+	outputLayerInput.Add(outputLayerInput, expandBias(bOut, 3))
+
+	output := applySigmoid(outputLayerInput)
+
+	// Print the results
+	fmt.Printf("Hidden Layer Activations:\n%v\n", mat.Formatted(hiddenLayerActivations, mat.Prefix(" ")))
+	fmt.Printf("Network Output:\n%v\n", mat.Formatted(output, mat.Prefix(" ")))
+}
+
+// Random floats generator
+func randomFloats(n int) []float64 {
+	floats := make([]float64, n)
+	for i := range floats {
+		floats[i] = rand.Float64()
+	}
+	return floats
+}
+
+// Sigmoid activation function
+func sigmoid(x float64) float64 {
+	return 1.0 / (1.0 + math.Exp(-x))
+}
+
+// Apply the sigmoid function to each element in the matrix
+func applySigmoid(m *mat.Dense) *mat.Dense {
+	rows, cols := m.Dims()
+	data := make([]float64, rows*cols)
+	for r := 0; r < rows; r++ {
+		for c := 0; c < cols; c++ {
+			data[r*cols+c] = sigmoid(m.At(r, c))
+		}
+	}
+	return mat.NewDense(rows, cols, data)
+}
+
+// Expand a bias vector to match the dimensions of the matrix for addition
+func expandBias(bias *mat.Dense, rows int) *mat.Dense {
+	_, cols := bias.Dims()
+	data := make([]float64, rows*cols)
+	for r := 0; r < rows; r++ {
+		for c := 0; c < cols; c++ {
+			data[r*cols+c] = bias.At(0, c)
+		}
+	}
+	return mat.NewDense(rows, cols, data)
+}
